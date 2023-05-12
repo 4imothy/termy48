@@ -17,6 +17,8 @@ pub const set_cursor_pos = "\x1B[{};{}H";
 pub const save_cursor_position = "\x1B[s";
 pub const restore_cursor_position = "\x1B[u";
 pub const hide_cursor = "\x1B[?25l";
+pub const show_cursor = "\x1B[?25h";
+pub const clear_page = "\x1B[2J";
 
 // TODO make this also have light backgrounds
 pub const bgs = [6]*const [5:0]u8{
