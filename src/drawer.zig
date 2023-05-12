@@ -7,7 +7,6 @@
 // cant put it in the normal u8, have to make array list
 // or print out as itself somehow
 // TODO check if the border characters can print on windows correctly
-// TODO place the cursor back at the start position to print over the previous board
 
 const main = @import("main.zig");
 const f = @import("formats.zig");
@@ -24,7 +23,7 @@ bottom_border: []u8,
 piece_width: u8,
 piece_height: u8,
 
-pub fn init(num_cols: usize, piece_width: u8, piece_height: u8) !Drawer {
+pub fn init(num_cols: usize, piece_width: u8, piece_height: u8) error{OutOfMemory}!Drawer {
     return Drawer{
         .piece_width = piece_width,
         .piece_height = piece_height,
