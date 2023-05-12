@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 
 const main = @import("main.zig");
-const allocator = main.allocator;
-const buf_wrtr = main.buf_wrtr;
 const std = @import("std");
 const Drawer = @import("drawer.zig");
+const allocator = main.allocator;
+const buf_wrtr = main.buf_wrtr;
 
 const BG_STYLING_LEN: u8 = 5;
 
