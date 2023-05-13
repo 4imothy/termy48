@@ -62,11 +62,10 @@ pub fn addRandomPiece(self: Board, rnd: *std.rand.DefaultPrng) error{OutOfMemory
     return true;
 }
 
-pub fn init(piece_size: u8, num_rows: usize, num_cols: usize) !Board {
-    const piece_width: u8 = (8 * piece_size) / 3;
+pub fn init(piece_width: u8, piece_height: u8, num_rows: usize, num_cols: usize) !Board {
     return Board{
         .pieces = try createBoard(num_rows, num_cols),
-        .drawer = try Drawer.init(num_cols, piece_width, piece_size),
+        .drawer = try Drawer.init(num_cols, piece_width, piece_height),
         .num_rows = num_rows,
         .num_cols = num_cols,
     };

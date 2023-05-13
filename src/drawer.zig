@@ -38,7 +38,10 @@ pub fn deinit(self: Drawer) void {
 }
 // TODO bug fix when printing on bottom, maybe move it back up the number of rows
 pub fn drawBoard(self: Drawer, board: *const Board) !void {
-    try buf_wrtr.print(f.save_cursor_position, .{});
+    try buf_wrtr.print(f.set_cursor_pos, .{ 0, 0 });
+    // believe this is only necesarry if we don't have the not enough space for board error
+    // try buf_wrtr.print(f.clear_page, .{});
+    // try buf_wrtr.print(f.save_cursor_position, .{});
     const values: []usize = try allocator.alloc(usize, board.num_cols);
     try buf_wrtr.print("{s}\n", .{self.top_border});
     const blanks: []u8 = try allocator.alloc(u8, self.piece_width);
@@ -54,7 +57,7 @@ pub fn drawBoard(self: Drawer, board: *const Board) !void {
             values[i] = elem;
             styles[i] = f.getStyles(elem);
         }
-        try printBlanksTill(row, styles, blanks, self.piece_height / 2);
+        try drawBlanksTill(row, styles, blanks, self.piece_height / 2);
         if (self.piece_height > 0) {
             idx += 1;
             try buf_wrtr.print("│{s}{s}", .{ f.bold, f.black_fg });
@@ -73,12 +76,13 @@ pub fn drawBoard(self: Drawer, board: *const Board) !void {
             }
             try buf_wrtr.print("{s}│\n", .{f.reset});
         }
-        try printBlanksTill(row, styles, blanks, (self.piece_height / 2));
+        try drawBlanksTill(row, styles, blanks, self.piece_height - 1 - (self.piece_height / 2));
     }
     try buf_wrtr.print("{s}\n\x1b[0m", .{self.bottom_border});
-    try buf_wrtr.print(f.restore_cursor_position, .{});
+    // try buf_wrtr.print(f.restore_cursor_position, .{});
     allocator.free(values);
 }
+
 var holder: [@sizeOf(usize) * 8]u8 = undefined;
 fn replaceCenterWithNumber(num: usize, blanks: []u8) ![]const u8 {
     // const line = allocator.alloc(u8, blanks.len);
@@ -120,7 +124,7 @@ fn hBorders(top: bool, num_cols: usize, piece_size: usize) error{OutOfMemory}![]
     return border.toOwnedSlice();
 }
 
-fn printBlanksTill(row: []usize, styles: []*const [BG_STYLING_LEN:0]u8, blanks: []u8, limit: u8) !void {
+fn drawBlanksTill(row: []usize, styles: []*const [BG_STYLING_LEN:0]u8, blanks: []u8, limit: u8) !void {
     var idx: usize = 0;
     while (idx < limit) {
         try buf_wrtr.print("│{s}{s}", .{ f.bold, f.black_fg });
