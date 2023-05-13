@@ -62,10 +62,23 @@ pub fn addRandomPiece(self: Board, rnd: *std.rand.DefaultPrng) error{OutOfMemory
     return true;
 }
 
-pub fn init(piece_width: u8, piece_height: u8, num_rows: usize, num_cols: usize) !Board {
+pub fn slideUp(self: Board) void {
+    _ = self;
+}
+pub fn slideDown(self: Board) void {
+    _ = self;
+}
+pub fn slideLeft(self: Board) void {
+    _ = self;
+}
+pub fn slideRight(self: Board) void {
+    _ = self;
+}
+
+pub fn init(piece_width: u8, piece_height: u8, num_rows: usize, num_cols: usize, draw_start_x: usize, draw_start_y: usize) !Board {
     return Board{
         .pieces = try createBoard(num_rows, num_cols),
-        .drawer = try Drawer.init(num_cols, piece_width, piece_height),
+        .drawer = try Drawer.init(num_cols, piece_width, piece_height, draw_start_x, draw_start_y),
         .num_rows = num_rows,
         .num_cols = num_cols,
     };

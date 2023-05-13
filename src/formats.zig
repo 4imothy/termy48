@@ -14,6 +14,7 @@ pub const white_fg = "\x1b[97m";
 pub const black_fg = "\x1b[30m";
 pub const black_bg = "\x1b[40m";
 pub const set_cursor_pos = "\x1B[{};{}H";
+pub const set_cursor_x = "\x1B[{}G";
 pub const save_cursor_position = "\x1B[s";
 pub const restore_cursor_position = "\x1B[u";
 pub const hide_cursor = "\x1B[?25l";
