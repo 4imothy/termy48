@@ -63,7 +63,7 @@ pub fn addRandomPiece(self: Board, rnd: *std.rand.DefaultPrng) error{OutOfMemory
 }
 
 pub fn slideUp(self: Board) void {
-    _ = self;
+    // start at the top piece and move it down till it is at the top
 }
 pub fn slideDown(self: Board) void {
     _ = self;
