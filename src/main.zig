@@ -23,14 +23,14 @@ pub const allocator = arena.allocator();
 pub fn main() !void {
     defer arena.deinit();
     // defaults
-    var num_cols: usize = 7;
-    var num_rows: usize = 5;
+    var num_cols: usize = 1;
+    var num_rows: usize = 1;
     // check if there is enough space to start the game
     if (num_cols == 0 or num_rows == 0) {
         try exitGameOnError(errors.insuf_space_for_numbers, .{});
     }
     var piece_height: u8 = 5;
-    var piece_width: u8 = 11;
+    var piece_width: u8 = 13;
     var tty: ?std.os.fd_t = try std.os.open("/dev/tty", system.O.RDWR, 0);
     var dims: [2]usize = try getDimensions(tty);
     const screen_width = dims[0];
@@ -43,9 +43,7 @@ pub fn main() !void {
     if (game_height > screen_height or game_width > screen_width) {
         try exitGameOnError(errors.insuf_space_for_board, .{});
     }
-    const draw_start_x: usize = (screen_width / 2) - (game_width / 2);
-    const draw_start_y: usize = (screen_height / 2) - (game_height / 2);
-    const board = try Board.init(piece_width, piece_height, num_rows, num_cols, draw_start_x, draw_start_y);
+    const board = try Board.init(piece_width, piece_height, num_rows, num_cols, screen_width, screen_height, game_width, game_height);
     try runGame(board);
 
     // Change this in future to hopefully work inline
@@ -86,28 +84,45 @@ fn runGame(board: Board) !void {
                 try deinitGame(board, orig);
                 exitGame();
             },
-            'h', 'a' => {
+            'h', 'a', 68 => { // left arrow
                 try board.slideLeft();
-                _ = try board.addRandomPiece();
-                try board.draw();
+                // if after you move there is no room for a piece
+                const res: bool = try board.addRandomPiece();
+                if (!res) {
+                    try endGame(board);
+                } else {
+                    try board.draw();
+                }
                 try buf.flush();
             },
-            'l', 'd' => {
+            'l', 'd', 67 => { // right arrow
                 try board.slideRight();
-                _ = try board.addRandomPiece();
-                try board.draw();
+                const res: bool = try board.addRandomPiece();
+                if (!res) {
+                    try endGame(board);
+                } else {
+                    try board.draw();
+                }
                 try buf.flush();
             },
-            'k', 'w' => {
+            'k', 'w', 65 => { // up arrow
                 try board.slideUp();
-                _ = try board.addRandomPiece();
-                try board.draw();
+                const res: bool = try board.addRandomPiece();
+                if (!res) {
+                    try endGame(board);
+                } else {
+                    try board.draw();
+                }
                 try buf.flush();
             },
-            'j', 's' => {
+            'j', 's', 66 => { // down arrow
                 try board.slideDown();
-                _ = try board.addRandomPiece();
-                try board.draw();
+                const res: bool = try board.addRandomPiece();
+                if (!res) {
+                    try endGame(board);
+                } else {
+                    try board.draw();
+                }
                 try buf.flush();
             },
             else => {},
@@ -143,4 +158,8 @@ pub fn exitGameOnError(comptime format: []const u8, args: anytype) !void {
     try buf_wrtr.print(format, args);
     try buf.flush();
     std.os.exit(1);
+}
+
+fn endGame(board: Board) !void {
+    try board.drawEndGame();
 }

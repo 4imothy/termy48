@@ -24,8 +24,12 @@ piece_width: u8,
 piece_height: u8,
 draw_start_x: usize,
 draw_start_y: usize,
+screen_width: usize,
+screen_height: usize,
 
-pub fn init(num_cols: usize, piece_width: u8, piece_height: u8, draw_start_x: usize, draw_start_y: usize) error{OutOfMemory}!Drawer {
+pub fn init(num_cols: usize, piece_width: u8, piece_height: u8, screen_width: usize, screen_height: usize, game_width: usize, game_height: usize) error{OutOfMemory}!Drawer {
+    const draw_start_x: usize = (screen_width / 2) - (game_width / 2);
+    const draw_start_y: usize = (screen_height / 2) - (game_height / 2);
     return Drawer{
         .piece_width = piece_width,
         .piece_height = piece_height,
@@ -33,12 +37,35 @@ pub fn init(num_cols: usize, piece_width: u8, piece_height: u8, draw_start_x: us
         .bottom_border = try hBorders(false, num_cols, piece_width),
         .draw_start_x = draw_start_x,
         .draw_start_y = draw_start_y,
+        .screen_width = screen_width,
+        .screen_height = screen_height,
     };
 }
 
 pub fn deinit(self: Drawer) void {
     allocator.free(self.top_border);
     allocator.free(self.bottom_border);
+}
+
+pub fn drawGameOver(self: Drawer) !void {
+    const len: u8 = 13;
+    var top = try std.ArrayList(u8).initCapacity(allocator, len);
+    var mid = try std.ArrayList(u8).initCapacity(allocator, len);
+    var bot = try std.ArrayList(u8).initCapacity(allocator, len);
+    try top.appendSlice("┌───────────┐");
+    try mid.appendSlice("│ Game Over │");
+    try bot.appendSlice("└───────────┘");
+
+    const x_index = self.screen_width / 2 - (len / 2) + 1;
+    try buf_wrtr.print(f.set_cursor_pos, .{ self.screen_height / 2, x_index });
+    try buf_wrtr.print("{s}\n", .{top.toOwnedSlice()});
+    try buf_wrtr.print(f.set_cursor_x, .{x_index});
+    try buf_wrtr.print("{s}\n", .{mid.toOwnedSlice()});
+    try buf_wrtr.print(f.set_cursor_x, .{x_index});
+    try buf_wrtr.print("{s}\n", .{bot.toOwnedSlice()});
+    top.deinit();
+    mid.deinit();
+    bot.deinit();
 }
 
 pub fn drawBoard(self: Drawer, board: *const Board) !void {

@@ -226,9 +226,6 @@ pub fn slideRight(self: Board) !void {
             }
         }
     }
-    for (right_walls) |v| {
-        std.debug.print("{}", .{v});
-    }
     i = self.num_rows;
     while (i > 0) {
         i -= 1;
@@ -266,14 +263,18 @@ pub fn slideRight(self: Board) !void {
     }
 }
 
-pub fn init(piece_width: u8, piece_height: u8, num_rows: usize, num_cols: usize, draw_start_x: usize, draw_start_y: usize) !Board {
+pub fn init(piece_width: u8, piece_height: u8, num_rows: usize, num_cols: usize, screen_width: usize, screen_height: usize, game_width: usize, game_height: usize) !Board {
     rnd = std.rand.DefaultPrng.init(@truncate(u64, @bitCast(u128, std.time.nanoTimestamp())));
     return Board{
         .pieces = try createBoard(num_rows, num_cols),
-        .drawer = try Drawer.init(num_cols, piece_width, piece_height, draw_start_x, draw_start_y),
+        .drawer = try Drawer.init(num_cols, piece_width, piece_height, screen_width, screen_height, game_width, game_height),
         .num_rows = num_rows,
         .num_cols = num_cols,
     };
+}
+
+pub fn drawEndGame(self: Board) !void {
+    try self.drawer.drawGameOver();
 }
 
 pub fn deinit(self: Board) void {
