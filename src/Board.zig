@@ -96,19 +96,46 @@ pub fn slideUp(self: Board) !void {
             if (elem != 0 and i != self.num_rows - 1) {
                 if (pieces[i][j] == pieces[i + 1][j]) {
                     pieces[i][j] *= 2;
-                    var k: usize = i + 2;
-                    while (k < self.num_rows) {
-                        pieces[k - 1][j] = pieces[k][j];
+                    var k: usize = i + 1;
+                    while (k < self.num_rows - 1) {
+                        pieces[k][j] = pieces[k + 1][j];
                         k += 1;
                     }
+                    pieces[k][j] = 0;
                 }
             }
         }
     }
 }
 
-pub fn slideDown(self: Board) void {
-    _ = self;
+pub fn slideDown(self: Board) !void {
+    const floor_ids = try allocator.alloc(usize, self.num_cols);
+    for (floor_ids) |*v| {
+        v.* = self.num_rows - 1;
+    }
+
+    const pieces = self.pieces;
+    for (pieces) |_, i| {
+        var j = self.num_cols - 1;
+
+        while (j > 0) {
+            if (pieces[i][j] != 0 and j == floor_ids[j]) {
+                floor_ids[j] -= 1;
+            }
+            j -= 1;
+        }
+    }
+    for (pieces) |_, i| {
+        var j = self.num_cols - 1;
+        while (j > 0) {
+            if (i != self.num_rows - 1 and pieces[i][j] != 0) {
+                pieces[floor_ids[j]][j] = pieces[i][j];
+                pieces[i][j] = 0;
+                floor_ids[j] -= 1;
+            }
+            j -= 1;
+        }
+    }
 }
 pub fn slideLeft(self: Board) void {
     _ = self;
@@ -142,4 +169,112 @@ fn createBoard(num_rows: usize, num_cols: usize) error{OutOfMemory}![][]usize {
         }
     }
     return board;
+}
+
+// TESTS
+test "slide up" {
+    const num_cols = 6;
+    const num_rows = 4;
+    var pieces = [_][num_cols]usize{
+        [_]usize{ 0, 8, 2, 4, 2, 2 },
+        [_]usize{ 0, 0, 2, 0, 0, 4 },
+        [_]usize{ 0, 2, 2, 0, 0, 0 },
+        [_]usize{ 2, 0, 2, 4, 0, 0 },
+    };
+    const p = &[_][]usize{ &pieces[0], &pieces[1], &pieces[2], &pieces[3] };
+
+    const board = Board{
+        .pieces = p,
+        .drawer = undefined,
+        .num_rows = num_rows,
+        .num_cols = num_cols,
+    };
+    try board.slideUp();
+
+    var after_pieces = [_][num_cols]usize{
+        [_]usize{ 2, 8, 4, 8, 2, 2 },
+        [_]usize{ 0, 2, 4, 0, 0, 4 },
+        [_]usize{ 0, 0, 0, 0, 0, 0 },
+        [_]usize{ 0, 0, 0, 0, 0, 0 },
+    };
+    const ap = &[_][]usize{ &after_pieces[0], &after_pieces[1], &after_pieces[2], &after_pieces[3] };
+    try std.testing.expect(checkPiecesEqual(board.pieces, ap));
+}
+
+test "slide up tiny" {
+    const num_cols = 1;
+    const num_rows = 1;
+    var pieces = [_][num_cols]usize{
+        [_]usize{2},
+    };
+    const p = &[_][]usize{&pieces[0]};
+
+    const board = Board{
+        .pieces = p,
+        .drawer = undefined,
+        .num_rows = num_rows,
+        .num_cols = num_cols,
+    };
+    try board.slideUp();
+
+    var after_pieces = [_][num_cols]usize{
+        [_]usize{2},
+    };
+    const ap = &[_][]usize{&after_pieces[0]};
+    try std.testing.expect(checkPiecesEqual(board.pieces, ap));
+}
+
+test "slide up column" {
+    const num_cols = 1;
+    const num_rows = 10;
+    var pieces = [_][num_cols]usize{
+        [_]usize{2},
+        [_]usize{2},
+        [_]usize{2},
+        [_]usize{2},
+        [_]usize{0},
+        [_]usize{2},
+        [_]usize{2},
+        [_]usize{8},
+        [_]usize{2},
+        [_]usize{2},
+    };
+
+    const p = &[_][]usize{ &pieces[0], &pieces[1], &pieces[2], &pieces[3], &pieces[4], &pieces[5], &pieces[6], &pieces[7], &pieces[8], &pieces[9] };
+    const board = Board{
+        .pieces = p,
+        .drawer = undefined,
+        .num_rows = num_rows,
+        .num_cols = num_cols,
+    };
+    try board.slideUp();
+
+    var after_pieces = [_][num_cols]usize{
+        [_]usize{4},
+        [_]usize{4},
+        [_]usize{4},
+        [_]usize{8},
+        [_]usize{4},
+        [_]usize{0},
+        [_]usize{0},
+        [_]usize{0},
+        [_]usize{0},
+        [_]usize{0},
+    };
+    const ap = &[_][]usize{ &after_pieces[0], &after_pieces[1], &after_pieces[2], &after_pieces[3], &after_pieces[4], &after_pieces[5], &after_pieces[6], &after_pieces[7], &after_pieces[8], &after_pieces[9] };
+    try std.testing.expect(checkPiecesEqual(board.pieces, ap));
+}
+
+fn checkPiecesEqual(board_1: [][]usize, board_2: [][]usize) bool {
+    if (board_1.len != board_2.len) return false;
+    if (board_1[0].len != board_2[0].len) return false;
+
+    for (board_1) |row, i| {
+        for (row) |_, j| {
+            if (board_1[i][j] != board_2[i][j]) {
+                return false;
+            }
+        }
+    }
+    return true;
 }

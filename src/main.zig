@@ -103,7 +103,7 @@ fn runGame(board: Board) !void {
                 try buf.flush();
             },
             'j', 's' => {
-                board.slideDown();
+                try board.slideDown();
                 try board.draw();
                 try buf.flush();
             },
