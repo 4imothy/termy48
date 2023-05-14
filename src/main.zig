@@ -23,8 +23,12 @@ pub const allocator = arena.allocator();
 pub fn main() !void {
     defer arena.deinit();
     // defaults
-    var num_cols: usize = 11;
+    var num_cols: usize = 10;
     var num_rows: usize = 8;
+    // check if there is enough space to start the game
+    if (num_cols == 0 or num_rows == 0) {
+        try exitGameOnError(errors.insuf_space_for_numbers, .{});
+    }
     var piece_height: u8 = 5;
     var piece_width: u8 = 11;
     var tty: ?std.os.fd_t = try std.os.open("/dev/tty", system.O.RDWR, 0);
@@ -52,12 +56,7 @@ pub fn main() !void {
 fn runGame(board: Board) !void {
     try buf_wrtr.print(f.hide_cursor, .{});
     defer board.deinit();
-    var rnd = std.rand.DefaultPrng.init(@truncate(u64, @bitCast(u128, std.time.nanoTimestamp())));
-    // check if there is enough space to start the game
-    const t = try board.addRandomPiece(&rnd);
-    if (!t) {
-        try exitGameOnError(errors.insuf_space_for_numbers, .{});
-    }
+    _ = try board.addRandomPiece();
     var orig = try std.os.tcgetattr(std.os.STDIN_FILENO);
     var new = orig;
     // TODO try this on windows, don't think it will work
@@ -80,14 +79,15 @@ fn runGame(board: Board) !void {
         char = try reader.readByte();
         switch (char) {
             'q' => {
-                deinitGame(board, orig);
-                try exitGame();
+                try deinitGame(board, orig);
+                exitGame();
             },
             'c' & '\x1F' => {
-                deinitGame(board, orig);
-                try exitGame();
+                try deinitGame(board, orig);
+                exitGame();
             },
             'h', 'a' => {
+                _ = try board.addRandomPiece();
                 board.slideLeft();
                 try board.draw();
                 try buf.flush();
@@ -98,7 +98,7 @@ fn runGame(board: Board) !void {
                 try buf.flush();
             },
             'k', 'w' => {
-                board.slideUp();
+                try board.slideUp();
                 try board.draw();
                 try buf.flush();
             },
@@ -124,15 +124,15 @@ fn getDimensions(tty: ?std.os.fd_t) ![2]usize {
     return .{ size.ws_col, size.ws_row };
 }
 
-fn deinitGame(board: Board, orig: std.os.termios) void {
+fn deinitGame(board: Board, orig: std.os.termios) !void {
+    try buf_wrtr.print(f.show_cursor, .{});
+    try buf.flush();
     board.deinit();
     std.os.tcsetattr(std.os.STDIN_FILENO, std.os.TCSA.FLUSH, orig) catch {};
     arena.deinit();
 }
 
-fn exitGame() !void {
-    try buf_wrtr.print(f.show_cursor, .{});
-    try buf.flush();
+fn exitGame() void {
     std.os.exit(0);
 }
 

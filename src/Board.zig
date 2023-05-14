@@ -10,6 +10,8 @@ const BG_STYLING_LEN: u8 = 5;
 
 const Board = @This();
 
+var rnd: std.rand.DefaultPrng = undefined;
+
 pieces: [][]usize,
 drawer: Drawer,
 num_rows: usize,
@@ -19,7 +21,7 @@ pub fn draw(self: Board) !void {
     try self.drawer.drawBoard(&self);
 }
 
-pub fn addRandomPiece(self: Board, rnd: *std.rand.DefaultPrng) error{OutOfMemory}!bool {
+pub fn addRandomPiece(self: Board) error{OutOfMemory}!bool {
     // store the indices which have a zero
     const opens: []bool = try allocator.alloc(bool, (self.num_rows * self.num_cols));
     var num_open: usize = 0;
@@ -62,9 +64,49 @@ pub fn addRandomPiece(self: Board, rnd: *std.rand.DefaultPrng) error{OutOfMemory
     return true;
 }
 
-pub fn slideUp(self: Board) void {
-    // start at the top piece and move it down till it is at the top
+pub fn slideUp(self: Board) !void {
+    const cap_ids = try allocator.alloc(usize, self.num_cols);
+    for (cap_ids) |*v| {
+        v.* = 0;
+    }
+    const pieces = self.pieces;
+    for (pieces) |row, i| {
+        for (row) |elem, j| {
+            if (elem != 0 and i == cap_ids[j]) {
+                cap_ids[j] += 1;
+            }
+        }
+    }
+    // to store the lowest row possible, cap as moving up,
+    for (pieces) |row, i| {
+        for (row) |elem, j| {
+            if (i != 0 and i > cap_ids[j] and elem != 0) {
+                pieces[cap_ids[j]][j] = elem;
+                pieces[i][j] = 0;
+                // now that we move a piece down the cap is one below
+                cap_ids[j] += 1;
+            }
+        }
+    }
+    allocator.free(cap_ids);
+    // at this point every piece has been sliden to the top as much as possible
+    // so we merge
+    for (pieces) |row, i| {
+        for (row) |elem, j| {
+            if (elem != 0 and i != self.num_rows - 1) {
+                if (pieces[i][j] == pieces[i + 1][j]) {
+                    pieces[i][j] *= 2;
+                    var k: usize = i + 2;
+                    while (k < self.num_rows) {
+                        pieces[k - 1][j] = pieces[k][j];
+                        k += 1;
+                    }
+                }
+            }
+        }
+    }
 }
+
 pub fn slideDown(self: Board) void {
     _ = self;
 }
@@ -76,6 +118,7 @@ pub fn slideRight(self: Board) void {
 }
 
 pub fn init(piece_width: u8, piece_height: u8, num_rows: usize, num_cols: usize, draw_start_x: usize, draw_start_y: usize) !Board {
+    rnd = std.rand.DefaultPrng.init(@truncate(u64, @bitCast(u128, std.time.nanoTimestamp())));
     return Board{
         .pieces = try createBoard(num_rows, num_cols),
         .drawer = try Drawer.init(num_cols, piece_width, piece_height, draw_start_x, draw_start_y),
