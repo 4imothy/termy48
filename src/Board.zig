@@ -65,6 +65,7 @@ pub fn addRandomPiece(self: Board) error{OutOfMemory}!bool {
 }
 
 pub fn slideUp(self: Board) !void {
+    // store the ids of the lowest height
     const cap_ids = try allocator.alloc(usize, self.num_cols);
     for (cap_ids) |*v| {
         v.* = 0;
@@ -77,13 +78,10 @@ pub fn slideUp(self: Board) !void {
             }
         }
     }
-    for (cap_ids) |v| {
-        std.debug.print("{}", .{v});
-    }
     // to store the lowest row possible, cap as moving up,
     for (pieces) |row, i| {
         for (row) |elem, j| {
-            if (i != 0 and i > cap_ids[j] and elem != 0) {
+            if (i > cap_ids[j] and elem != 0) {
                 pieces[cap_ids[j]][j] = elem;
                 pieces[i][j] = 0;
                 // now that we move a piece down the cap is one below
@@ -112,6 +110,7 @@ pub fn slideUp(self: Board) !void {
 }
 
 pub fn slideDown(self: Board) !void {
+    // store the ids of the highest depth
     const floor_ids = try allocator.alloc(usize, self.num_cols);
     for (floor_ids) |*v| {
         v.* = self.num_rows - 1;
@@ -128,9 +127,6 @@ pub fn slideDown(self: Board) !void {
                 floor_ids[j] -= 1;
             }
         }
-    }
-    for (floor_ids) |v| {
-        std.debug.print("{}", .{v});
     }
     i = self.num_rows;
     while (i > 0) {
@@ -167,8 +163,50 @@ pub fn slideDown(self: Board) !void {
         }
     }
 }
-pub fn slideLeft(self: Board) void {
-    _ = self;
+pub fn slideLeft(self: Board) !void {
+    const left_wall_ids = try allocator.alloc(usize, self.num_rows);
+    for (left_wall_ids) |*v| {
+        v.* = 0;
+    }
+
+    const pieces = self.pieces;
+    for (pieces) |row, i| {
+        for (row) |elem, j| {
+            if (elem != 0 and j == left_wall_ids[i]) {
+                left_wall_ids[i] += 1;
+            }
+        }
+    }
+
+    for (pieces) |row, i| {
+        for (row) |elem, j| {
+            // if the column is to the right of the wall and element isn't zero
+            if (j > left_wall_ids[i] and elem != 0) {
+                pieces[i][left_wall_ids[i]] = elem;
+                pieces[i][j] = 0;
+                // moved a piece ther so now wall is one thicker
+                left_wall_ids[i] += 1;
+            }
+        }
+    }
+    allocator.free(left_wall_ids);
+
+    // now we merge
+    for (pieces) |row, i| {
+        for (row) |elem, j| {
+            if (elem != 0 and j != self.num_cols - 1) {
+                if (pieces[i][j] == pieces[i][j + 1]) {
+                    pieces[i][j] *= 2;
+                    var k: usize = j + 1;
+                    while (k < self.num_cols - 1) {
+                        pieces[i][k] = pieces[i][k + 1];
+                        k += 1;
+                    }
+                    pieces[i][k] = 0;
+                }
+            }
+        }
+    }
 }
 pub fn slideRight(self: Board) void {
     _ = self;

@@ -87,12 +87,12 @@ fn runGame(board: Board) !void {
                 exitGame();
             },
             'h', 'a' => {
-                _ = try board.addRandomPiece();
-                board.slideLeft();
+                try board.slideLeft();
                 try board.draw();
                 try buf.flush();
             },
             'l', 'd' => {
+                _ = try board.addRandomPiece();
                 board.slideRight();
                 try board.draw();
                 try buf.flush();
