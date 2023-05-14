@@ -23,8 +23,8 @@ pub const allocator = arena.allocator();
 pub fn main() !void {
     defer arena.deinit();
     // defaults
-    var num_cols: usize = 10;
-    var num_rows: usize = 8;
+    var num_cols: usize = 7;
+    var num_rows: usize = 5;
     // check if there is enough space to start the game
     if (num_cols == 0 or num_rows == 0) {
         try exitGameOnError(errors.insuf_space_for_numbers, .{});
