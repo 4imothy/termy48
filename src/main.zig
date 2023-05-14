@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
 
-// TODO when it ends place the cursor below the board i think
 // TODO Get the cursor position
 // TODO print from center of screen
 // TODO generalize the input stuff for all os
@@ -45,14 +44,14 @@ pub fn main() !void {
         try exitGameOnError(errors.insuf_space_for_board, .{});
     }
     const board = try Board.init(piece_width, piece_height, num_rows, num_cols, screen_width, screen_height, game_width, game_height);
-    try runGame(board);
+    try runGame(board, screen_height);
 
     // Change this in future to hopefully work inline
     // have to save the position as when printing below and
     // the board moves up the restored position is wrong
 }
 
-fn runGame(board: Board) !void {
+fn runGame(board: Board, screen_height: usize) !void {
     try buf_wrtr.print(f.hide_cursor, .{});
     defer board.deinit();
     _ = try board.addRandomPiece();
@@ -78,11 +77,11 @@ fn runGame(board: Board) !void {
         char = try reader.readByte();
         switch (char) {
             'q' => {
-                try deinitGame(board, orig);
+                try deinitGame(board, screen_height, orig);
                 exitGame();
             },
             'c' & '\x1F' => {
-                try deinitGame(board, orig);
+                try deinitGame(board, screen_height, orig);
                 exitGame();
             },
             'h', 'a', 68 => { // left arrow
@@ -158,10 +157,11 @@ fn getDimensions(tty: ?std.os.fd_t) ![2]usize {
     return .{ size.ws_col, size.ws_row };
 }
 
-fn deinitGame(board: Board, orig: std.os.termios) !void {
+fn deinitGame(board: Board, screen_height: usize, orig: std.os.termios) !void {
     try buf_wrtr.print(f.show_cursor, .{});
-    try buf.flush();
+    try buf_wrtr.print(f.set_cursor_y, .{screen_height});
     board.deinit();
+    try buf.flush();
     std.os.tcsetattr(std.os.STDIN_FILENO, std.os.TCSA.FLUSH, orig) catch {};
     arena.deinit();
 }

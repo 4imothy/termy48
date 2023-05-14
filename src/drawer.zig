@@ -26,6 +26,7 @@ draw_start_x: usize,
 draw_start_y: usize,
 screen_width: usize,
 screen_height: usize,
+game_height: usize,
 
 pub fn init(num_cols: usize, piece_width: u8, piece_height: u8, screen_width: usize, screen_height: usize, game_width: usize, game_height: usize) error{OutOfMemory}!Drawer {
     const draw_start_x: usize = (screen_width / 2) - (game_width / 2);
@@ -39,6 +40,7 @@ pub fn init(num_cols: usize, piece_width: u8, piece_height: u8, screen_width: us
         .draw_start_y = draw_start_y,
         .screen_width = screen_width,
         .screen_height = screen_height,
+        .game_height = game_height,
     };
 }
 
