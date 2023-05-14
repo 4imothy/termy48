@@ -88,22 +88,25 @@ fn runGame(board: Board) !void {
             },
             'h', 'a' => {
                 try board.slideLeft();
+                _ = try board.addRandomPiece();
                 try board.draw();
                 try buf.flush();
             },
             'l', 'd' => {
+                try board.slideRight();
                 _ = try board.addRandomPiece();
-                board.slideRight();
                 try board.draw();
                 try buf.flush();
             },
             'k', 'w' => {
                 try board.slideUp();
+                _ = try board.addRandomPiece();
                 try board.draw();
                 try buf.flush();
             },
             'j', 's' => {
                 try board.slideDown();
+                _ = try board.addRandomPiece();
                 try board.draw();
                 try buf.flush();
             },

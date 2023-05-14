@@ -208,8 +208,62 @@ pub fn slideLeft(self: Board) !void {
         }
     }
 }
-pub fn slideRight(self: Board) void {
-    _ = self;
+pub fn slideRight(self: Board) !void {
+    // controls the max value to the right
+    const right_walls = try allocator.alloc(usize, self.num_rows);
+    for (right_walls) |*v| {
+        v.* = self.num_cols - 1;
+    }
+    const pieces = self.pieces;
+    var i: usize = self.num_rows;
+    while (i > 0) {
+        i -= 1;
+        var j: usize = self.num_cols;
+        while (j > 0) {
+            j -= 1;
+            if (pieces[i][j] != 0 and j == right_walls[i] and j != 0) {
+                right_walls[i] -= 1;
+            }
+        }
+    }
+    for (right_walls) |v| {
+        std.debug.print("{}", .{v});
+    }
+    i = self.num_rows;
+    while (i > 0) {
+        i -= 1;
+        var j = self.num_cols;
+        while (j > 0) {
+            j -= 1;
+            if (j < right_walls[i] and pieces[i][j] != 0) {
+                pieces[i][right_walls[i]] = pieces[i][j];
+                pieces[i][j] = 0;
+                right_walls[i] -= 1;
+            }
+        }
+    }
+    allocator.free(right_walls);
+
+    // now we merge
+    i = self.num_rows;
+    while (i > 0) {
+        i -= 1;
+        var j = self.num_cols;
+        while (j > 0) {
+            j -= 1;
+            if (pieces[i][j] != 0 and j != 0) {
+                if (pieces[i][j] == pieces[i][j - 1]) {
+                    pieces[i][j] *= 2;
+                    var k: usize = j - 1;
+                    while (k > 0) {
+                        pieces[i][k] = pieces[i][k - 1];
+                        k -= 1;
+                    }
+                    pieces[i][k] = 0;
+                }
+            }
+        }
+    }
 }
 
 pub fn init(piece_width: u8, piece_height: u8, num_rows: usize, num_cols: usize, draw_start_x: usize, draw_start_y: usize) !Board {
