@@ -279,6 +279,9 @@ pub fn drawEndGame(self: Board) !void {
 
 pub fn deinit(self: Board) void {
     self.drawer.deinit();
+    for (self.pieces) |row| {
+        allocator.free(row);
+    }
     allocator.free(self.pieces);
 }
 

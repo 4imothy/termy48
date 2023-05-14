@@ -48,23 +48,29 @@ pub fn deinit(self: Drawer) void {
 }
 
 pub fn drawGameOver(self: Drawer) !void {
-    const len: u8 = 13;
+    const len: u8 = 19;
     var top = try std.ArrayList(u8).initCapacity(allocator, len);
-    var mid = try std.ArrayList(u8).initCapacity(allocator, len);
+    // middel 1 and middle 2
+    var mi1 = try std.ArrayList(u8).initCapacity(allocator, len);
+    var mi2 = try std.ArrayList(u8).initCapacity(allocator, len);
     var bot = try std.ArrayList(u8).initCapacity(allocator, len);
-    try top.appendSlice("┌───────────┐");
-    try mid.appendSlice("│ Game Over │");
-    try bot.appendSlice("└───────────┘");
+    try top.appendSlice("┌─────────────────┐");
+    try mi1.appendSlice("│    Game Over    │");
+    try mi2.appendSlice("│ Press q to quit │");
+    try bot.appendSlice("└─────────────────┘");
 
     const x_index = self.screen_width / 2 - (len / 2) + 1;
     try buf_wrtr.print(f.set_cursor_pos, .{ self.screen_height / 2, x_index });
     try buf_wrtr.print("{s}\n", .{top.toOwnedSlice()});
     try buf_wrtr.print(f.set_cursor_x, .{x_index});
-    try buf_wrtr.print("{s}\n", .{mid.toOwnedSlice()});
+    try buf_wrtr.print("{s}\n", .{mi1.toOwnedSlice()});
+    try buf_wrtr.print(f.set_cursor_x, .{x_index});
+    try buf_wrtr.print("{s}\n", .{mi2.toOwnedSlice()});
     try buf_wrtr.print(f.set_cursor_x, .{x_index});
     try buf_wrtr.print("{s}\n", .{bot.toOwnedSlice()});
     top.deinit();
-    mid.deinit();
+    mi1.deinit();
+    mi2.deinit();
     bot.deinit();
 }
 

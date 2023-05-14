@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
+// TODO when it ends place the cursor below the board i think
 // TODO Get the cursor position
 // TODO print from center of screen
 // TODO generalize the input stuff for all os
@@ -23,7 +24,7 @@ pub const allocator = arena.allocator();
 pub fn main() !void {
     defer arena.deinit();
     // defaults
-    var num_cols: usize = 1;
+    var num_cols: usize = 10;
     var num_rows: usize = 1;
     // check if there is enough space to start the game
     if (num_cols == 0 or num_rows == 0) {
@@ -70,10 +71,10 @@ fn runGame(board: Board) !void {
     try buf_wrtr.print(f.clear_page, .{});
     try buf_wrtr.print(f.set_cursor_pos, .{ 0, 0 });
     try buf.flush();
-    var running = true;
+    var accepting_moves = true;
     try board.draw();
     try buf.flush();
-    while (running) {
+    while (true) {
         char = try reader.readByte();
         switch (char) {
             'q' => {
@@ -85,45 +86,60 @@ fn runGame(board: Board) !void {
                 exitGame();
             },
             'h', 'a', 68 => { // left arrow
-                try board.slideLeft();
-                // if after you move there is no room for a piece
-                const res: bool = try board.addRandomPiece();
-                if (!res) {
-                    try endGame(board);
-                } else {
-                    try board.draw();
+                if (accepting_moves) {
+                    try board.slideLeft();
+                    // if after you move there is no room for a piece
+                    const res: bool = try board.addRandomPiece();
+                    if (!res) {
+                        try endGame(board);
+                        accepting_moves = false;
+                    } else {
+                        try board.draw();
+                    }
+                    try buf.flush();
                 }
-                try buf.flush();
             },
             'l', 'd', 67 => { // right arrow
-                try board.slideRight();
-                const res: bool = try board.addRandomPiece();
-                if (!res) {
-                    try endGame(board);
-                } else {
-                    try board.draw();
+                if (accepting_moves) {
+                    try board.slideRight();
+                    // if after you move there is no room for a piece
+                    const res: bool = try board.addRandomPiece();
+                    if (!res) {
+                        try endGame(board);
+                        accepting_moves = false;
+                    } else {
+                        try board.draw();
+                    }
+                    try buf.flush();
                 }
-                try buf.flush();
             },
             'k', 'w', 65 => { // up arrow
-                try board.slideUp();
-                const res: bool = try board.addRandomPiece();
-                if (!res) {
-                    try endGame(board);
-                } else {
-                    try board.draw();
+                if (accepting_moves) {
+                    try board.slideUp();
+                    // if after you move there is no room for a piece
+                    const res: bool = try board.addRandomPiece();
+                    if (!res) {
+                        try endGame(board);
+                        accepting_moves = false;
+                    } else {
+                        try board.draw();
+                    }
+                    try buf.flush();
                 }
-                try buf.flush();
             },
             'j', 's', 66 => { // down arrow
-                try board.slideDown();
-                const res: bool = try board.addRandomPiece();
-                if (!res) {
-                    try endGame(board);
-                } else {
-                    try board.draw();
+                if (accepting_moves) {
+                    try board.slideDown();
+                    // if after you move there is no room for a piece
+                    const res: bool = try board.addRandomPiece();
+                    if (!res) {
+                        try endGame(board);
+                        accepting_moves = false;
+                    } else {
+                        try board.draw();
+                    }
+                    try buf.flush();
                 }
-                try buf.flush();
             },
             else => {},
         }
