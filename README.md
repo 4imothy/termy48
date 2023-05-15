@@ -41,4 +41,9 @@ Please tell me the results on your machine if they differ or would add to the li
 | Alactritty | :white_check_mark: | :question: | :question: |
 | Kitty| :question: | :white_check_mark: | :question: |
 | VSC Terminal | :white_check_mark: | :white_check_mark: | :question: |
+| ST | :question: | :white_check_mark: | :question: |
+| st| :question: | :white_check_mark: | :question: |
+| xterm| :question: | :white_check_mark: | :question: | 
+| urxvt| :question: | :white_check_mark: | :question: |
+
 | All/Others | :question: | :question: | :question: |
