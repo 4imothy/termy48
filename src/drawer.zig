@@ -3,10 +3,8 @@
 // Do a first print, then restore? No.
 // LOGIC: print the border, save the final position, move it the num rows up then print again
 // TODO only print the border once to make printing faster
-// TODO make the blanks (0) have a · in the center of it
 // cant put it in the normal u8, have to make array list
 // or print out as itself somehow
-// TODO check if the border characters can print on windows correctly
 
 const main = @import("main.zig");
 const f = @import("formats.zig");

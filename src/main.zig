@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 // TODO Get the cursor position, to play game inline not full screen
-// TODO generalize the input stuff for all os
+// TODO generalize the input stuff for all os, need windows
 // TODO eventually read num_rows, num_cols from arguments
 
 //* Styling *\\
@@ -52,7 +52,6 @@ fn runGame(board: Board, screen_height: usize) !void {
     _ = try board.addRandomPiece();
     var orig = try std.os.tcgetattr(std.os.STDIN_FILENO);
     var new = orig;
-    // TODO try this on windows, don't think it will work
     // make it it's own branch
     // ISIG: Disable vanilla CTRL-C and CTRL-Z
     // ECHO: Stop the terminal from displaying pressed keys.
