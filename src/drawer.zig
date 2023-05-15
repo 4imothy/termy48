@@ -144,7 +144,9 @@ fn replaceCenterWithNumber(num: usize, blanks: []u8) ![]const u8 {
     const line = try allocator.alloc(u8, blanks.len);
     const center = line.len / 2;
     const str_num = try std.fmt.bufPrint(&holder, "{d}", .{num});
-    const start_replace = center - (str_num.len / 2);
+    // catches error of a piece is too tiny than just replace whole thing
+    // rather than ending game
+    const start_replace = std.math.sub(usize, center, (str_num.len / 2)) catch 0;
     const end_replace = center + ((str_num.len - 1) / 2);
     var num_idx: usize = 0;
     for (line) |_, i| {
