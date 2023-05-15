@@ -23,6 +23,8 @@ Create games of $2048$ of any size to play in the comfort of your terminal.
 |*-w*| Set the width of each piece|
 |*-h*| Set the height of each piece|
 
+If none given *-r=4*, *-c=4*, *-w=11*, *-h=5*
+
 #### Demo Video
 
 https://github.com/4tlc/termy48/assets/40186632/2cad1025-8520-4558-8ed3-1bc22bfe6836
