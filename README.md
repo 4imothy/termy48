@@ -45,5 +45,4 @@ Please tell me the results on your machine if they differ or would add to the li
 | st| :question: | :white_check_mark: | :question: |
 | xterm| :question: | :white_check_mark: | :question: | 
 | urxvt| :question: | :white_check_mark: | :question: |
-
 | All/Others | :question: | :question: | :question: |
