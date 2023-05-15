@@ -35,8 +35,10 @@ https://github.com/4tlc/termy48/assets/40186632/2cad1025-8520-4558-8ed3-1bc22bfe
 
 Please tell me the results on your machine if they differ or would add to the listings below.
 
-| Platforms | MacOs | Linux | Windows |
+| Platforms | MacOs | Arch Linux | Windows |
 | ---------- |------|-------|---------|
 | Default MacOs Terminal| :white_check_mark: | N/A | N/A |
 | Alactritty | :white_check_mark: | :question: | :question: |
+| Kitty| :question: | :white_check_mark: | :question: |
+| VSC Terminal | :white_check_mark: | :white_check_mark: | :question: |
 | All/Others | :question: | :question: | :question: |
