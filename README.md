@@ -3,6 +3,8 @@
 
 Create games of $2048$ of any size to play in the comfort of your terminal.
 
+Made with zig version: *10.1*
+
 #### Controls
 
 | Keys | Moves |
