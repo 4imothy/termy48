@@ -34,6 +34,7 @@ https://github.com/4tlc/termy48/assets/40186632/2cad1025-8520-4558-8ed3-1bc22bfe
 #### List Of Supported Operating Systems and Platforms
 
 Please tell me the results on your machine if they differ or would add to the listings below.
+Windows will not be supported until at least *1.0* of zig.
 
 | Platforms | MacOs | Arch Linux | Windows |
 | ---------- |------|-------|---------|
