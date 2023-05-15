@@ -9,4 +9,4 @@ This is not finished do not use.
 
 | Platforms | MacOs | Linux |
 | ---------- |------|-------|
-| Alactritty | :white_check_mark | :question |
+| Alactritty | :white_check_mark: | :question: |
