@@ -31,10 +31,6 @@ pub fn main() !void {
     var num_cols: usize = data.num_cols;
     var piece_width: u8 = data.piece_width;
     var piece_height: u8 = data.piece_height;
-    // check if there is enough space to start the game
-    if (num_cols == 0 or num_rows == 0) {
-        try exitGameOnError(errors.insuf_space_for_numbers, .{});
-    }
     var tty: ?std.os.fd_t = try std.os.open("/dev/tty", system.O.RDWR, 0);
     var dims: [2]usize = try getDimensions(tty);
     const screen_width = dims[0];
