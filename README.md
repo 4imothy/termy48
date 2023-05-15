@@ -9,6 +9,6 @@ This is not finished do not use.
 
 | Platforms | MacOs | Linux | Windows |
 | ---------- |------|-------|---------|
-| Default Terminal| :white_check_mark: | N/A | N/A |
+| Default MacOs Terminal| :white_check_mark: | N/A | N/A |
 | Alactritty | :white_check_mark: | :question: | :question: |
 | All/Others | :question: | :question: | :question: |
