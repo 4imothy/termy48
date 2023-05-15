@@ -7,6 +7,8 @@ This is not finished do not use.
 
 #### List Of Supported Operating Systems and Platforms
 
-| Platforms | MacOs | Linux |
-| ---------- |------|-------|
-| Alactritty | :white_check_mark: | :question: |
+| Platforms | MacOs | Linux | Windows |
+| ---------- |------|-------|---------|
+| Default Terminal| :white_check_mark: | N/A | N/A |
+| Alactritty | :white_check_mark: | :question: | :question: |
+| All/Others | :question: | :question: | :question: |
