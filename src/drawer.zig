@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
 
-// Do a first print, then restore? No.
-// LOGIC: print the border, save the final position, move it the num rows up then print again
-// TODO only print the border once to make printing faster
-// cant put it in the normal u8, have to make array list
-// or print out as itself somehow
-
 const main = @import("main.zig");
 const f = @import("formats.zig");
 const allocator = main.allocator;
@@ -16,8 +10,6 @@ const Board = @import("Board.zig");
 const BG_STYLING_LEN: u8 = 5;
 const Drawer = @This();
 
-top_border: []u8,
-bottom_border: []u8,
 piece_width: u8,
 piece_height: u8,
 draw_start_x: usize,
@@ -25,113 +17,85 @@ draw_start_y: usize,
 screen_width: usize,
 screen_height: usize,
 game_height: usize,
+game_width: usize,
 
-pub fn init(num_cols: usize, piece_width: u8, piece_height: u8, screen_width: usize, screen_height: usize, game_width: usize, game_height: usize) error{OutOfMemory}!Drawer {
+pub fn init(num_cols: usize, num_rows: usize, piece_width: u8, piece_height: u8, screen_width: usize, screen_height: usize) !Drawer {
+    const game_width = num_cols * piece_width;
+    const game_height = num_rows * piece_height;
     const draw_start_x: usize = (screen_width / 2) - (game_width / 2);
     const draw_start_y: usize = (screen_height / 2) - (game_height / 2);
+    try buf_wrtr.print(f.clear_page, .{});
+    _ = try drawBorders(draw_start_x, draw_start_y, game_width, game_height);
     return Drawer{
         .piece_width = piece_width,
         .piece_height = piece_height,
-        .top_border = try hBorders(true, num_cols, piece_width),
-        .bottom_border = try hBorders(false, num_cols, piece_width),
         .draw_start_x = draw_start_x,
         .draw_start_y = draw_start_y,
         .screen_width = screen_width,
         .screen_height = screen_height,
         .game_height = game_height,
+        .game_width = game_width,
     };
 }
 
-pub fn deinit(self: Drawer) void {
-    allocator.free(self.top_border);
-    allocator.free(self.bottom_border);
-}
-
 pub fn drawGameOver(self: Drawer) !void {
+    try buf_wrtr.print(f.reset, .{});
     const len: u8 = 19;
-    var top = try std.ArrayList(u8).initCapacity(allocator, len);
-    // middel 1 and middle 2
-    var mi1 = try std.ArrayList(u8).initCapacity(allocator, len);
-    var mi2 = try std.ArrayList(u8).initCapacity(allocator, len);
-    var bot = try std.ArrayList(u8).initCapacity(allocator, len);
-    try top.appendSlice("┌─────────────────┐");
-    try mi1.appendSlice("│    Game Over    │");
-    try mi2.appendSlice("│ Press q to quit │");
-    try bot.appendSlice("└─────────────────┘");
-
     const x_index = self.screen_width / 2 - (len / 2) + 1;
     try buf_wrtr.print(f.set_cursor_pos, .{ self.screen_height / 2, x_index });
-    try buf_wrtr.print("{s}\n", .{top.toOwnedSlice()});
+    try buf_wrtr.print("┌─────────────────┐\n", .{});
     try buf_wrtr.print(f.set_cursor_x, .{x_index});
-    try buf_wrtr.print("{s}\n", .{mi1.toOwnedSlice()});
+    try buf_wrtr.print("│    Game Over    │\n", .{});
     try buf_wrtr.print(f.set_cursor_x, .{x_index});
-    try buf_wrtr.print("{s}\n", .{mi2.toOwnedSlice()});
+    try buf_wrtr.print("│ Press q to quit │\n", .{});
     try buf_wrtr.print(f.set_cursor_x, .{x_index});
-    try buf_wrtr.print("{s}\n", .{bot.toOwnedSlice()});
-    top.deinit();
-    mi1.deinit();
-    mi2.deinit();
-    bot.deinit();
+    try buf_wrtr.print("└─────────────────┘\n", .{});
 }
 
 pub fn drawBoard(self: Drawer, board: *const Board) !void {
-    // try buf_wrtr.print(f.set_cursor_pos, .{ 10, 0 });
-    // believe this is only necesarry if we don't have the not enough space for board error
-    // try buf_wrtr.print(f.clear_page, .{});
-    // try buf_wrtr.print(f.save_cursor_position, .{});
-    const values: []usize = try allocator.alloc(usize, board.num_cols);
-    try buf_wrtr.print(f.set_cursor_pos, .{ self.draw_start_y, self.draw_start_x });
-    try buf_wrtr.print("{s}\n", .{self.top_border});
+    try buf_wrtr.print(f.set_cursor_pos, .{ self.draw_start_y + 1, self.draw_start_x + 1 });
     const blanks: []u8 = try allocator.alloc(u8, self.piece_width);
     for (blanks) |*elem| {
         elem.* = ' ';
     }
-    const styles: []*const [BG_STYLING_LEN:0]u8 = try allocator.alloc(*const [BG_STYLING_LEN:0]u8, board.num_cols);
     for (board.pieces) |row| {
-        try buf_wrtr.print(f.set_cursor_x, .{self.draw_start_x});
+        try buf_wrtr.print(f.set_cursor_x, .{self.draw_start_x + 1});
         // one traversal to get the numbers
         // allocate num_cols * piece_width + 5, 5 for the coloring
-        for (row) |elem, i| {
-            values[i] = elem;
-            styles[i] = f.getStyles(elem);
-        }
-        try self.drawBlanksTill(row, styles, blanks, self.piece_height / 2);
+        // this ends on a new line
+        try self.drawBlanksTill(row, blanks, self.piece_height / 2);
         if (self.piece_height > 0) {
-            try buf_wrtr.print(f.set_cursor_x, .{self.draw_start_x});
-            try buf_wrtr.print("│{s}{s}", .{ f.bold, f.black_fg });
-            for (row) |v, i| {
+            try buf_wrtr.print(f.set_cursor_x, .{self.draw_start_x + 1});
+            try buf_wrtr.print("{s}{s}", .{ f.bold, f.black_fg });
+            for (row) |v| {
                 if (v != 0) {
                     const line = try replaceCenterWithNumber(v, blanks);
-                    try buf_wrtr.print("{s}{s}", .{ styles[i], line });
+                    try buf_wrtr.print("{s}{s}", .{ f.getStyles(v), line });
                     allocator.free(line);
                 } else {
                     // doesn't work despite no warning about the int value being too large
                     // blanks[blanks.len / 2] = '·';
                     blanks[blanks.len / 2] = '~';
-                    try buf_wrtr.print("{s}{s}{s}{s}", .{ styles[i], f.white_fg, blanks, f.black_fg });
+                    try buf_wrtr.print("{s}{s}{s}{s}", .{ f.getStyles(v), f.white_fg, blanks, f.black_fg });
                     blanks[blanks.len / 2] = ' ';
                 }
             }
-            try buf_wrtr.print("{s}│\n", .{f.reset});
         }
-        try self.drawBlanksTill(row, styles, blanks, self.piece_height - 1 - (self.piece_height / 2));
+        try buf_wrtr.print("\n", .{});
+        try self.drawBlanksTill(row, blanks, self.piece_height - 1 - (self.piece_height / 2));
     }
-    try buf_wrtr.print(f.set_cursor_x, .{self.draw_start_x});
-    try buf_wrtr.print("{s}\n\x1b[0m", .{self.bottom_border});
-    // try buf_wrtr.print(f.restore_cursor_position, .{});
-    allocator.free(values);
+    allocator.free(blanks);
 }
 
-fn drawBlanksTill(self: Drawer, row: []usize, styles: []*const [BG_STYLING_LEN:0]u8, blanks: []u8, limit: u8) !void {
+fn drawBlanksTill(self: Drawer, row: []usize, blanks: []u8, limit: u8) !void {
     var idx: usize = 0;
     while (idx < limit) {
-        try buf_wrtr.print(f.set_cursor_x, .{self.draw_start_x});
-        try buf_wrtr.print("│{s}{s}", .{ f.bold, f.black_fg });
-        for (row) |_, i| {
+        try buf_wrtr.print(f.set_cursor_x, .{self.draw_start_x + 1});
+        for (row) |v| {
             // print the blank styling
-            try buf_wrtr.print("{s}{s}", .{ styles[i], blanks });
+            try buf_wrtr.print("{s}{s}", .{ f.getStyles(v), blanks });
         }
-        try buf_wrtr.print("{s}│\n", .{f.reset});
+        try buf_wrtr.print("\n", .{});
         idx += 1;
     }
 }
@@ -158,23 +122,34 @@ fn replaceCenterWithNumber(num: usize, blanks: []u8) ![]const u8 {
     return line;
 }
 
-// make a string of num_cols + 2 (for borders)
-fn hBorders(top: bool, num_cols: usize, piece_size: usize) error{OutOfMemory}![]u8 {
-    var border = std.ArrayList(u8).init(allocator);
-    if (top) {
-        try border.appendSlice("┌");
-    } else {
-        try border.appendSlice("└");
-    }
+fn drawBorders(draw_start_x: usize, draw_start_y: usize, game_width: usize, game_height: usize) !void {
+    // set the cursor to correct position and styling
+    try buf_wrtr.print(f.set_cursor_pos, .{ draw_start_y, draw_start_x });
+    try buf_wrtr.print(f.reset, .{});
+
+    // start drawing the borders
+    try buf_wrtr.print("┌", .{});
     var i: usize = 0;
-    while (i < num_cols * piece_size) {
-        try border.appendSlice("─");
+    while (i < game_width) {
+        try buf_wrtr.print("─", .{});
         i += 1;
     }
-    if (top) {
-        try border.appendSlice("┐");
-    } else {
-        try border.appendSlice("┘");
+    try buf_wrtr.print("┐", .{});
+    try buf_wrtr.print("\n", .{});
+    i = 0;
+    while (i < game_height) {
+        try buf_wrtr.print(f.set_cursor_x, .{draw_start_x});
+        try buf_wrtr.print("│", .{});
+        try buf_wrtr.print(f.set_cursor_x, .{draw_start_x + game_width + 1});
+        try buf_wrtr.print("│\n", .{});
+        i += 1;
     }
-    return border.toOwnedSlice();
+    try buf_wrtr.print(f.set_cursor_x, .{draw_start_x});
+    try buf_wrtr.print("└", .{});
+    i = 0;
+    while (i < game_width) {
+        try buf_wrtr.print("─", .{});
+        i += 1;
+    }
+    try buf_wrtr.print("┘", .{});
 }
