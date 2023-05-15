@@ -43,12 +43,13 @@ pub fn main() !void {
     if (game_height > screen_height or game_width > screen_width) {
         try exitGameOnError(errors.insuf_space_for_board, .{});
     }
-    const board = try Board.init(piece_width, piece_height, num_rows, num_cols, screen_width, screen_height, game_width, game_height);
+    const board = try Board.init(piece_width, piece_height, num_rows, num_cols, screen_width, screen_height);
     try runGame(board, screen_height);
 }
 
 fn runGame(board: Board, screen_height: usize) !void {
     try buf_wrtr.print(f.hide_cursor, .{});
+    // TODO make this start with two pieces
     _ = try board.addRandomPiece();
     var orig = try std.os.tcgetattr(std.os.STDIN_FILENO);
     var new = orig;
@@ -60,8 +61,6 @@ fn runGame(board: Board, screen_height: usize) !void {
     try std.os.tcsetattr(std.os.STDIN_FILENO, std.os.TCSA.FLUSH, new);
     var char: u8 = undefined;
     var reader = std.io.getStdIn().reader();
-    try buf_wrtr.print(f.clear_page, .{});
-    try buf_wrtr.print(f.set_cursor_pos, .{ 0, 0 });
     try buf.flush();
     var accepting_moves = true;
     try board.draw();
