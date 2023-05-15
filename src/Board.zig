@@ -2,7 +2,7 @@
 
 const main = @import("main.zig");
 const std = @import("std");
-const Drawer = @import("drawer.zig");
+const Drawer = @import("Drawer.zig");
 const allocator = main.allocator;
 const buf_wrtr = main.buf_wrtr;
 
@@ -263,11 +263,11 @@ pub fn slideRight(self: Board) !void {
     }
 }
 
-pub fn init(piece_width: u8, piece_height: u8, num_rows: usize, num_cols: usize, screen_width: usize, screen_height: usize, game_width: usize, game_height: usize) !Board {
+pub fn init(piece_width: u8, piece_height: u8, num_rows: usize, num_cols: usize, screen_width: usize, screen_height: usize) !Board {
     rnd = std.rand.DefaultPrng.init(@truncate(u64, @bitCast(u128, std.time.nanoTimestamp())));
     return Board{
         .pieces = try createBoard(num_rows, num_cols),
-        .drawer = try Drawer.init(num_cols, piece_width, piece_height, screen_width, screen_height, game_width, game_height),
+        .drawer = try Drawer.init(num_cols, num_rows, piece_width, piece_height, screen_width, screen_height),
         .num_rows = num_rows,
         .num_cols = num_cols,
     };
@@ -278,7 +278,7 @@ pub fn drawEndGame(self: Board) !void {
 }
 
 pub fn deinit(self: Board) void {
-    self.drawer.deinit();
+    // self.drawer.deinit();
     for (self.pieces) |row| {
         allocator.free(row);
     }
