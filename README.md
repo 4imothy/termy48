@@ -3,9 +3,9 @@
 
 Create games of $2048$ of any size to play in the comfort of your terminal.
 
-This is not finished do not use.
-
 #### List Of Supported Operating Systems and Platforms
+
+Please tell me the results on your machine if they differ or would add to the listings below.
 
 | Platforms | MacOs | Linux | Windows |
 | ---------- |------|-------|---------|
