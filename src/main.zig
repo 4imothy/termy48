@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-// TODO Get the cursor position
-// TODO print from center of screen
+// TODO Get the cursor position, to play game inline not full screen
 // TODO generalize the input stuff for all os
 // TODO eventually read num_rows, num_cols from arguments
 
@@ -11,26 +10,31 @@ const std = @import("std");
 const Board = @import("Board.zig");
 const f = @import("formats.zig");
 const errors = @import("errors.zig");
+const arg_parser = @import("arg_parser.zig");
 const system = std.os.system;
 const out = std.io.getStdOut();
 var buf = std.io.bufferedWriter(out.writer());
 var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 
-// used in Board.zig
+// used in drawer.zig and arg_parser
 pub const buf_wrtr = buf.writer();
 pub const allocator = arena.allocator();
 
 pub fn main() !void {
-    defer arena.deinit();
-    // defaults
-    var num_cols: usize = 10;
-    var num_rows: usize = 1;
+    const data = try arg_parser.parseArgs(allocator);
+    if (!data.start_game) {
+        arena.deinit();
+        try buf.flush();
+        std.os.exit(0);
+    }
+    var num_rows: usize = data.num_rows;
+    var num_cols: usize = data.num_cols;
+    var piece_width: u8 = data.piece_width;
+    var piece_height: u8 = data.piece_height;
     // check if there is enough space to start the game
     if (num_cols == 0 or num_rows == 0) {
         try exitGameOnError(errors.insuf_space_for_numbers, .{});
     }
-    var piece_height: u8 = 5;
-    var piece_width: u8 = 13;
     var tty: ?std.os.fd_t = try std.os.open("/dev/tty", system.O.RDWR, 0);
     var dims: [2]usize = try getDimensions(tty);
     const screen_width = dims[0];
@@ -45,15 +49,10 @@ pub fn main() !void {
     }
     const board = try Board.init(piece_width, piece_height, num_rows, num_cols, screen_width, screen_height, game_width, game_height);
     try runGame(board, screen_height);
-
-    // Change this in future to hopefully work inline
-    // have to save the position as when printing below and
-    // the board moves up the restored position is wrong
 }
 
 fn runGame(board: Board, screen_height: usize) !void {
     try buf_wrtr.print(f.hide_cursor, .{});
-    defer board.deinit();
     _ = try board.addRandomPiece();
     var orig = try std.os.tcgetattr(std.os.STDIN_FILENO);
     var new = orig;
@@ -64,7 +63,6 @@ fn runGame(board: Board, screen_height: usize) !void {
     // ICANON: Allows us to read inputs byte-wise instead of line-wise.
     new.lflag &= ~(system.ECHO | system.ICANON | system.ISIG);
     try std.os.tcsetattr(std.os.STDIN_FILENO, std.os.TCSA.FLUSH, new);
-    defer std.os.tcsetattr(std.os.STDIN_FILENO, std.os.TCSA.FLUSH, orig) catch {};
     var char: u8 = undefined;
     var reader = std.io.getStdIn().reader();
     try buf_wrtr.print(f.clear_page, .{});
