@@ -21,20 +21,24 @@ pub const buf_wrtr = buf.writer();
 pub const allocator = arena.allocator();
 
 pub fn main() !void {
-    const data = try arg_parser.parseArgs(allocator);
+    var tty: ?std.os.fd_t = try std.os.open("/dev/tty", system.O.RDWR, 0);
+    var dims: [2]usize = try getDimensions(tty);
+    const screen_width = dims[0];
+    const screen_height = dims[1];
+    const data = try arg_parser.parseArgs(
+        allocator,
+        screen_width,
+        screen_height,
+    );
     if (!data.start_game) {
         arena.deinit();
         try buf.flush();
         std.os.exit(0);
     }
+    const piece_width = data.piece_width;
+    const piece_height = data.piece_height;
     var num_rows: usize = data.num_rows;
     var num_cols: usize = data.num_cols;
-    var piece_width: u8 = data.piece_width;
-    var piece_height: u8 = data.piece_height;
-    var tty: ?std.os.fd_t = try std.os.open("/dev/tty", system.O.RDWR, 0);
-    var dims: [2]usize = try getDimensions(tty);
-    const screen_width = dims[0];
-    const screen_height = dims[1];
     // remove weird printing behavior
     // can be fixed by clearing whole page, favor this for faster
     // printing

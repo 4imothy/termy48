@@ -19,13 +19,14 @@ const help_info =
     \\ *example*: ./termy48 -r=4 -c=4 -w=11 -h=5
 ;
 
-pub fn parseArgs(allocator: std.mem.Allocator) !Data {
+pub fn parseArgs(allocator: std.mem.Allocator, screen_width: usize, screen_height: usize) !Data {
+    // defaults
     var data = Data{
         .start_game = true,
         .num_rows = 4,
         .num_cols = 4,
-        .piece_width = 11,
-        .piece_height = 5,
+        .piece_width = nextOdd(u8, screen_width, 10),
+        .piece_height = nextOdd(u8, screen_height, 6),
     };
     var args = try std.process.argsWithAllocator(allocator);
     // throw away the exe info
@@ -76,4 +77,10 @@ fn parseArgForValue(arg: []const u8, field: anytype, dest: anytype) !bool {
         return false;
     }
     return true;
+}
+
+fn nextOdd(comptime T: type, num: usize, by: usize) u8 {
+    var val = @intCast(T, num / by);
+    if (val % 2 == 0) val += 1;
+    return val;
 }
