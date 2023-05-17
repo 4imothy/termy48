@@ -1,11 +1,10 @@
 ### Termy48
-#### A Fast $2048$ Clone to Play in the Terminal
+Create fast $2048$ games of any size to play in your terminal.
 
 #### Demo Video
 
 https://github.com/4tlc/termy48/assets/40186632/2cad1025-8520-4558-8ed3-1bc22bfe6836
 
-Create games of $2048$ of any size to play in the comfort of your terminal.
 
 Made with zig version: *10.1*
 
