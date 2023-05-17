@@ -2,7 +2,6 @@
 
 // TODO Get the cursor position, to play game inline not full screen
 // TODO generalize the input stuff for all os, need windows
-// TODO eventually read num_rows, num_cols from arguments
 
 //* Styling *\\
 //* TypeName | namespace_name | global_var | functionName | const_name *\\
@@ -48,14 +47,6 @@ pub fn main() !void {
         try exitGameOnError(errors.insuf_space_for_board, .{});
     }
     const board = try Board.init(piece_width, piece_height, num_rows, num_cols, screen_width, screen_height, data.show_score);
-    try runGame(board, screen_height);
-}
-
-// TODO make this a bool that returns false on leave
-fn runGame(board: Board, screen_height: usize) !void {
-    try buf_wrtr.print(f.hide_cursor, .{});
-    // TODO make this start with two pieces
-    _ = try board.addRandomPiece();
     var orig = try std.os.tcgetattr(std.os.STDIN_FILENO);
     var new = orig;
     // make it it's own branch
@@ -64,6 +55,16 @@ fn runGame(board: Board, screen_height: usize) !void {
     // ICANON: Allows us to read inputs byte-wise instead of line-wise.
     new.lflag &= ~(system.ECHO | system.ICANON | system.ISIG);
     try std.os.tcsetattr(std.os.STDIN_FILENO, std.os.TCSA.FLUSH, new);
+    try runGame(board);
+    try deinitGame(board, screen_height, orig);
+    exitGame();
+}
+
+// TODO make this a bool that returns false on leave
+fn runGame(board: Board) !void {
+    try buf_wrtr.print(f.hide_cursor, .{});
+    // TODO make this start with two pieces
+    _ = try board.addRandomPiece();
     var char: u8 = undefined;
     var reader = std.io.getStdIn().reader();
     try buf.flush();
@@ -74,12 +75,10 @@ fn runGame(board: Board, screen_height: usize) !void {
         char = try reader.readByte();
         switch (char) {
             'q' => {
-                try deinitGame(board, screen_height, orig);
-                exitGame();
+                return;
             },
             'c' & '\x1F' => {
-                try deinitGame(board, screen_height, orig);
-                exitGame();
+                return;
             },
             'h', 'a', 68 => { // left arrow
                 if (accepting_moves) {
