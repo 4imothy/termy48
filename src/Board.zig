@@ -11,6 +11,7 @@ const BG_STYLING_LEN: u8 = 5;
 pub const Board = @This();
 
 var rnd: std.rand.DefaultPrng = undefined;
+var score: usize = 0;
 
 pieces: [][]usize,
 drawer: Drawer,
@@ -19,6 +20,7 @@ num_cols: usize,
 
 pub fn draw(self: Board) !void {
     try self.drawer.drawBoard(&self);
+    try self.drawer.drawScore(&score);
 }
 
 pub fn addRandomPiece(self: Board) error{OutOfMemory}!bool {
@@ -97,6 +99,7 @@ pub fn slideUp(self: Board) !void {
             if (elem != 0 and i != self.num_rows - 1) {
                 if (pieces[i][j] == pieces[i + 1][j]) {
                     pieces[i][j] *= 2;
+                    score += pieces[i][j];
                     var k: usize = i + 1;
                     while (k < self.num_rows - 1) {
                         pieces[k][j] = pieces[k + 1][j];
@@ -152,6 +155,7 @@ pub fn slideDown(self: Board) !void {
             if (pieces[i][j] != 0 and i != 0) {
                 if (pieces[i][j] == pieces[i - 1][j]) {
                     pieces[i][j] *= 2;
+                    score += pieces[i][j];
                     var k: usize = i - 1;
                     while (k > 0) {
                         pieces[k][j] = pieces[k - 1][j];
@@ -197,6 +201,7 @@ pub fn slideLeft(self: Board) !void {
             if (elem != 0 and j != self.num_cols - 1) {
                 if (pieces[i][j] == pieces[i][j + 1]) {
                     pieces[i][j] *= 2;
+                    score += pieces[i][j];
                     var k: usize = j + 1;
                     while (k < self.num_cols - 1) {
                         pieces[i][k] = pieces[i][k + 1];
@@ -251,6 +256,7 @@ pub fn slideRight(self: Board) !void {
             if (pieces[i][j] != 0 and j != 0) {
                 if (pieces[i][j] == pieces[i][j - 1]) {
                     pieces[i][j] *= 2;
+                    score += pieces[i][j];
                     var k: usize = j - 1;
                     while (k > 0) {
                         pieces[i][k] = pieces[i][k - 1];

@@ -38,6 +38,15 @@ pub fn init(num_cols: usize, num_rows: usize, piece_width: u8, piece_height: u8,
     };
 }
 
+pub fn drawScore(self: Drawer, score: *usize) !void {
+    // get the length
+    //          "Score: $score"
+    const len = 7 + numDigits(score);
+    const x_index = self.draw_start_x + (self.game_width / 2) - (len / 2);
+    try buf_wrtr.print(f.set_cursor_pos, .{ self.draw_start_y - 1, x_index });
+    try buf_wrtr.print("{s}Score: {d}", .{ f.reset, score.* });
+}
+
 pub fn drawGameOver(self: Drawer) !void {
     try buf_wrtr.print(f.reset, .{});
     const len: u8 = 19;
@@ -152,4 +161,15 @@ fn drawBorders(draw_start_x: usize, draw_start_y: usize, game_width: usize, game
         i += 1;
     }
     try buf_wrtr.print("┘", .{});
+}
+
+fn numDigits(num: *usize) usize {
+    var val_copy = num.*;
+    var count: usize = 0;
+    while (val_copy > 0) {
+        val_copy /= 10;
+        count += 1;
+    }
+    count += 1;
+    return count;
 }
