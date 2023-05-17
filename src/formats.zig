@@ -9,8 +9,8 @@ const std = @import("std");
 pub const reset = "\x1b[0m";
 pub const bold = "\x1b[1m";
 // this is bright white, change to 37 for normal
-// pub const white_fg = "\x1b[97m";
 pub const white_fg = "\x1b[97m";
+// pub const white_fg = "\x1b[37m";
 pub const black_fg = "\x1b[30m";
 pub const black_bg = "\x1b[40m";
 pub const set_cursor_pos = "\x1B[{};{}H";
