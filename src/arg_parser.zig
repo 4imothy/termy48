@@ -24,7 +24,6 @@ const help_info =
     \\ will show the score
 ;
 
-// TODO make a -s if it is present than show score other wise don't
 // TODO make sure score alwasy shows nice even on full boards, outside tmux
 pub fn parseArgs(allocator: std.mem.Allocator, screen_width: usize, screen_height: usize) !Data {
     // defaults
