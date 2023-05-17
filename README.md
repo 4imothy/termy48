@@ -3,8 +3,7 @@
 
 #### Demo Video
 
-<img src="https://github.com/4tlc/termy48/assets/40186632/2cad1025-8520-4558-8ed3-1bc22bfe6836
-" width="200">
+<img src="https://github.com/4tlc/termy48/assets/40186632/2cad1025-8520-4558-8ed3-1bc22bfe6836" width="200">
 
 Create games of $2048$ of any size to play in the comfort of your terminal.
 
