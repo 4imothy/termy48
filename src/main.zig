@@ -37,8 +37,8 @@ pub fn main() !void {
     }
     const piece_width = data.piece_width;
     const piece_height = data.piece_height;
-    var num_rows: usize = data.num_rows;
-    var num_cols: usize = data.num_cols;
+    const num_rows: usize = data.num_rows;
+    const num_cols: usize = data.num_cols;
     // remove weird printing behavior
     // can be fixed by clearing whole page, favor this for faster
     // printing
@@ -47,10 +47,11 @@ pub fn main() !void {
     if (game_height > screen_height or game_width > screen_width) {
         try exitGameOnError(errors.insuf_space_for_board, .{});
     }
-    const board = try Board.init(piece_width, piece_height, num_rows, num_cols, screen_width, screen_height);
+    const board = try Board.init(piece_width, piece_height, num_rows, num_cols, screen_width, screen_height, data.show_score);
     try runGame(board, screen_height);
 }
 
+// TODO make this a bool that returns false on leave
 fn runGame(board: Board, screen_height: usize) !void {
     try buf_wrtr.print(f.hide_cursor, .{});
     // TODO make this start with two pieces

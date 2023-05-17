@@ -8,6 +8,7 @@ const Data = struct {
     num_cols: usize,
     piece_width: u8,
     piece_height: u8,
+    show_score: bool,
 };
 
 const help_info =
@@ -19,6 +20,8 @@ const help_info =
     \\ *example*: ./termy48 -r=4 -c=4 -w=11 -h=5
 ;
 
+// TODO make a -s if it is present than show score other wise don't
+// TODO make sure score alwasy shows nice even on full boards, outside tmux
 pub fn parseArgs(allocator: std.mem.Allocator, screen_width: usize, screen_height: usize) !Data {
     // defaults
     var data = Data{
@@ -27,6 +30,7 @@ pub fn parseArgs(allocator: std.mem.Allocator, screen_width: usize, screen_heigh
         .num_cols = 4,
         .piece_width = nextOdd(u8, screen_width, 10),
         .piece_height = nextOdd(u8, screen_height, 6),
+        .show_score = false,
     };
     var args = try std.process.argsWithAllocator(allocator);
     // throw away the exe info
@@ -56,6 +60,8 @@ pub fn parseArgs(allocator: std.mem.Allocator, screen_width: usize, screen_heigh
                 data.start_game = false;
                 return data;
             }
+        } else if (std.mem.startsWith(u8, arg, "-s")) {
+            data.show_score = true;
         } else {
             try buf_wrtr.print(errors.unknown_argument, .{arg});
             data.start_game = false;

@@ -17,10 +17,13 @@ pieces: [][]usize,
 drawer: Drawer,
 num_rows: usize,
 num_cols: usize,
+show_score: bool,
 
 pub fn draw(self: Board) !void {
     try self.drawer.drawBoard(&self);
-    try self.drawer.drawScore(&score);
+    if (self.show_score) {
+        try self.drawer.drawScore(&score);
+    }
 }
 
 pub fn addRandomPiece(self: Board) error{OutOfMemory}!bool {
@@ -269,13 +272,14 @@ pub fn slideRight(self: Board) !void {
     }
 }
 
-pub fn init(piece_width: u8, piece_height: u8, num_rows: usize, num_cols: usize, screen_width: usize, screen_height: usize) !Board {
+pub fn init(piece_width: u8, piece_height: u8, num_rows: usize, num_cols: usize, screen_width: usize, screen_height: usize, show_score: bool) !Board {
     rnd = std.rand.DefaultPrng.init(@truncate(u64, @bitCast(u128, std.time.nanoTimestamp())));
     return Board{
         .pieces = try createBoard(num_rows, num_cols),
         .drawer = try Drawer.init(num_cols, num_rows, piece_width, piece_height, screen_width, screen_height),
         .num_rows = num_rows,
         .num_cols = num_cols,
+        .show_score = show_score,
     };
 }
 
