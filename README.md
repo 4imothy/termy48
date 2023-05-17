@@ -1,5 +1,10 @@
 ### Termy48
-#### A $2048$ clone for the terminal
+#### A Fast $2048$ Clone to Play in the Terminal
+
+#### Demo Video
+
+<img src="https://github.com/4tlc/termy48/assets/40186632/2cad1025-8520-4558-8ed3-1bc22bfe6836
+" width="200">
 
 Create games of $2048$ of any size to play in the comfort of your terminal.
 
@@ -27,10 +32,6 @@ Made with zig version: *10.1*
 |*-s*| If this is present show the score|
 
 If none given *-r=4*, *-c=4*, *-w=11*, *-h=5*
-
-#### Demo Video
-
-https://github.com/4tlc/termy48/assets/40186632/2cad1025-8520-4558-8ed3-1bc22bfe6836
 
 #### List Of Supported Operating Systems and Platforms
 
