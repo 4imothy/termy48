@@ -24,6 +24,7 @@ Made with zig version: *10.1*
 |*-c*| Set the number of columns|
 |*-w*| Set the width of each piece|
 |*-h*| Set the height of each piece|
+|*-s*| If this is present show the score|
 
 If none given *-r=4*, *-c=4*, *-w=11*, *-h=5*
 

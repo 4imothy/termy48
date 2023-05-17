@@ -13,11 +13,15 @@ const Data = struct {
 
 const help_info =
     \\ -h: help
+    \\ -s: if present show the score
     \\ -r: number of rows
     \\ -c: number of columns
     \\ -w: width of pieces
     \\ -h: height of pieces
-    \\ *example*: ./termy48 -r=4 -c=4 -w=11 -h=5
+    \\ *example*: ./termy48 -r=4 -c=4 -w=11 -h=5 -s
+    \\ that will make a 4 x 4 board where each piece
+    \\ has a width of 11 and a height of 5, the game
+    \\ will show the score
 ;
 
 // TODO make a -s if it is present than show score other wise don't
