@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-// TODO Get the cursor position, to play game inline not full screen
+// TODO make work with zig 0.11.0
 // TODO generalize the input stuff for all os, need windows
 
 //* Styling *\\
